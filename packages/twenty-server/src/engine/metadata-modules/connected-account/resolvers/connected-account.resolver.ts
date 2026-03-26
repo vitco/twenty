@@ -17,6 +17,7 @@ import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { SettingsPermissionGuard } from 'src/engine/guards/settings-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { ConnectedAccountMetadataService } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.service';
+import { ConnectedAccountDataAccessService } from 'src/engine/metadata-modules/connected-account/data-access/services/connected-account-data-access.service';
 import { ConnectedAccountDTO } from 'src/engine/metadata-modules/connected-account/dtos/connected-account.dto';
 import { ConnectedAccountGraphqlApiExceptionInterceptor } from 'src/engine/metadata-modules/connected-account/interceptors/connected-account-graphql-api-exception.interceptor';
 
@@ -26,6 +27,8 @@ import { ConnectedAccountGraphqlApiExceptionInterceptor } from 'src/engine/metad
 export class ConnectedAccountResolver {
   constructor(
     private readonly connectedAccountMetadataService: ConnectedAccountMetadataService,
+    // TODO: remove once IS_CONNECTED_ACCOUNT_MIGRATED feature flag is removed
+    private readonly connectedAccountDataAccessService: ConnectedAccountDataAccessService,
   ) {}
 
   @Query(() => [ConnectedAccountDTO])
@@ -64,9 +67,16 @@ export class ConnectedAccountResolver {
       workspaceId: workspace.id,
     });
 
-    return this.connectedAccountMetadataService.delete({
-      id,
-      workspaceId: workspace.id,
-    });
+    // TODO: replace with connectedAccountMetadataService.delete once IS_CONNECTED_ACCOUNT_MIGRATED feature flag is removed
+    // Using data access service to ensure workspace-side events fire for message/calendar cleanup
+    const connectedAccount =
+      await this.connectedAccountMetadataService.findById({
+        id,
+        workspaceId: workspace.id,
+      });
+
+    await this.connectedAccountDataAccessService.delete(workspace.id, { id });
+
+    return connectedAccount as ConnectedAccountDTO;
   }
 }

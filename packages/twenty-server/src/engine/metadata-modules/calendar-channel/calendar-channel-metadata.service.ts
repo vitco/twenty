@@ -14,7 +14,6 @@ import {
 } from 'src/engine/metadata-modules/calendar-channel/calendar-channel.exception';
 import { CalendarChannelDTO } from 'src/engine/metadata-modules/calendar-channel/dtos/calendar-channel.dto';
 import { CalendarChannelEntity } from 'src/engine/metadata-modules/calendar-channel/entities/calendar-channel.entity';
-import { CalendarChannelDataAccessService } from 'src/engine/metadata-modules/calendar-channel/data-access/services/calendar-channel-data-access.service';
 import { ConnectedAccountMetadataService } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.service';
 
 @Injectable()
@@ -23,7 +22,6 @@ export class CalendarChannelMetadataService {
     @InjectRepository(CalendarChannelEntity)
     private readonly repository: Repository<CalendarChannelEntity>,
     private readonly connectedAccountMetadataService: ConnectedAccountMetadataService,
-    private readonly calendarChannelDataAccessService: CalendarChannelDataAccessService,
   ) {}
 
   async findAll(workspaceId: string): Promise<CalendarChannelDTO[]> {
@@ -183,7 +181,7 @@ export class CalendarChannelMetadataService {
       where: { id, workspaceId },
     });
 
-    await this.calendarChannelDataAccessService.delete(workspaceId, { id });
+    await this.repository.delete({ id, workspaceId });
 
     return calendarChannel;
   }

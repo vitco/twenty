@@ -7,7 +7,6 @@ import {
   ConnectedAccountException,
   ConnectedAccountExceptionCode,
 } from 'src/engine/metadata-modules/connected-account/connected-account.exception';
-import { ConnectedAccountDataAccessService } from 'src/engine/metadata-modules/connected-account/data-access/services/connected-account-data-access.service';
 import { ConnectedAccountDTO } from 'src/engine/metadata-modules/connected-account/dtos/connected-account.dto';
 import { ConnectedAccountEntity } from 'src/engine/metadata-modules/connected-account/entities/connected-account.entity';
 
@@ -16,7 +15,6 @@ export class ConnectedAccountMetadataService {
   constructor(
     @InjectRepository(ConnectedAccountEntity)
     private readonly repository: Repository<ConnectedAccountEntity>,
-    private readonly connectedAccountDataAccessService: ConnectedAccountDataAccessService,
   ) {}
 
   async findAll(workspaceId: string): Promise<ConnectedAccountDTO[]> {
@@ -143,7 +141,7 @@ export class ConnectedAccountMetadataService {
       where: { id, workspaceId },
     });
 
-    await this.connectedAccountDataAccessService.delete(workspaceId, { id });
+    await this.repository.delete({ id, workspaceId });
 
     return connectedAccount;
   }
