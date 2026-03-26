@@ -10,6 +10,7 @@ import {
 } from 'twenty-shared/types';
 
 import { ConnectedAccountMetadataService } from 'src/engine/metadata-modules/connected-account/connected-account-metadata.service';
+import { MessageChannelDataAccessService } from 'src/engine/metadata-modules/message-channel/data-access/services/message-channel-data-access.service';
 import { MessageChannelDTO } from 'src/engine/metadata-modules/message-channel/dtos/message-channel.dto';
 import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
 import {
@@ -23,6 +24,7 @@ export class MessageChannelMetadataService {
     @InjectRepository(MessageChannelEntity)
     private readonly repository: Repository<MessageChannelEntity>,
     private readonly connectedAccountMetadataService: ConnectedAccountMetadataService,
+    private readonly messageChannelDataAccessService: MessageChannelDataAccessService,
   ) {}
 
   async findAll(workspaceId: string): Promise<MessageChannelDTO[]> {
@@ -183,7 +185,7 @@ export class MessageChannelMetadataService {
       where: { id, workspaceId },
     });
 
-    await this.repository.delete({ id, workspaceId });
+    await this.messageChannelDataAccessService.delete(workspaceId, { id });
 
     return messageChannel;
   }
